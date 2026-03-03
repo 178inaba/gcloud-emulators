@@ -1,4 +1,4 @@
-FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:558.0.0-emulators
+FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:559.0.0-emulators
 
 ENV DATABASE_MODE=firestore-native
 
