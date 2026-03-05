@@ -47,7 +47,7 @@ jobs:
         run: echo "gcloud-version=$(head -n 1 firestore/Dockerfile | cut -d ':' -f 2 | cut -d '-' -f 1)" >> $GITHUB_OUTPUT
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
