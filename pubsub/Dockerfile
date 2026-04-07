@@ -1,4 +1,4 @@
-FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:563.0.0-emulators
+FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:564.0.0-emulators
 
 EXPOSE 8085
 
