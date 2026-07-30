@@ -129,7 +129,9 @@ Unlike the other images, this one is built from the [`firebase-tools`](https://w
 $ docker run -d --name firebase-auth-emulator -p 9099:9099 ghcr.io/178inaba/firebase-auth-emulator
 ```
 
-The Emulator UI is disabled so that starting the container requires no network access. To enable it, mount your own `firebase.json` over `/app/firebase.json`.
+The Emulator UI is disabled, which keeps the emulator usable without network access — with the UI enabled, `firebase-tools` downloads it at container start. To turn it on, mount your own `firebase.json` over `/app/firebase.json`.
+
+Offline, the CLI still logs `Unable to fetch the CLI MOTD and remote config` on startup. That warning is harmless and does not affect the emulator.
 
 ### GitHub Actions
 

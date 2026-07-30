@@ -77,14 +77,16 @@ curl -f localhost:9099
 
 - **PR tests**: Build image, start container, verify HTTP 200 via curl health check
 - **Publish**: On merge to main, push multi-platform (amd64/arm64) images to both Docker Hub (`178inaba/*`) and GHCR (`ghcr.io/178inaba/*`)
-- **Image tags**: `latest`, version number, commit SHA. The version comes from the first line of the Dockerfile for the gcloud-based images (e.g., `555.0.0`), but for Firebase Auth it is the `firebase-tools` version read out of the lock file with `jq -r '.packages["node_modules/firebase-tools"].version' firebase-auth/package-lock.json`
+- **Image tags**: `latest`, version number, commit SHA
+  - gcloud-based images: version read from the first line of the Dockerfile (e.g., `555.0.0`)
+  - Firebase Auth: the `firebase-tools` version read from `firebase-auth/package-lock.json`
 - **Dependabot**: Daily automated updates for base images (gcloud version tags, and the `node` digest for Firebase Auth), npm packages (`firebase-tools`), and GitHub Actions
 
 ## Important Notes
 
 - Firestore Dockerfile uses `sh -c` to run the command because it needs shell expansion for the `DATABASE_MODE` environment variable
 - Pub/Sub emulator requires the `beta` subcommand: `gcloud beta emulators pubsub start`
-- Firebase Auth emulator needs no JRE — unlike the Firestore and Pub/Sub emulators it is a plain Node implementation inside `firebase-tools`, not a downloaded JAR
+- Do not add a JRE to the Firebase Auth image. The Firestore and Pub/Sub emulators run downloaded JARs, but the auth emulator is implemented in `firebase-tools` itself
 - Firebase Auth image disables the Emulator UI in `firebase.json`. Enabling it makes `firebase-tools` download a UI zip at container start, which would make startup depend on network access
 - The Firebase Auth base image is pinned to the `node:lts-slim` digest rather than a patch version tag, so that Dependabot tracks LTS releases only. A patch-pinned tag would let it bump to non-LTS majors
 - Publish workflows use path filters. The gcloud-based ones only watch their Dockerfile and their own workflow file, but `publish-firebase-auth.yml` also watches `package.json`, `package-lock.json`, and `firebase.json`, since its version and base image are not in the Dockerfile
