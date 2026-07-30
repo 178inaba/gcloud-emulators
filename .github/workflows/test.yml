@@ -16,6 +16,9 @@ jobs:
     strategy:
       matrix:
         include:
+          - emulator: firebase-auth
+            port: 9099
+            docker-run-args: "-p 9099:9099"
           - emulator: firestore
             port: 8080
             docker-run-args: "-e DATABASE_MODE=datastore-mode -p 8080:8080"

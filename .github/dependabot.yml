@@ -8,8 +8,15 @@ updates:
       - 178inaba
   - package-ecosystem: docker
     directories:
+      - /firebase-auth
       - /firestore
       - /pubsub
+    schedule:
+      interval: daily
+    assignees:
+      - 178inaba
+  - package-ecosystem: npm
+    directory: /firebase-auth
     schedule:
       interval: daily
     assignees:
