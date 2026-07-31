@@ -8,7 +8,6 @@ on:
       - pubsub/Dockerfile
       - .github/workflows/publish-pubsub.yml
       - .github/workflows/reusable-publish-emulator.yml
-  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

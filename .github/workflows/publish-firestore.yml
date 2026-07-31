@@ -8,7 +8,6 @@ on:
       - firestore/Dockerfile
       - .github/workflows/publish-firestore.yml
       - .github/workflows/reusable-publish-emulator.yml
-  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
