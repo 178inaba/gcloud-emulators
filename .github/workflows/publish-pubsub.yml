@@ -24,6 +24,7 @@ jobs:
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository_owner }}/pubsub-emulator
+      CACHE_SCOPE: publish-pubsub
     outputs:
       digest: ${{ steps.build-and-push.outputs.digest }}
     steps:
@@ -70,8 +71,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
-          cache-from: type=gha,scope=publish-pubsub
-          cache-to: type=gha,mode=max,scope=publish-pubsub
+          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}
           provenance: false
       - name: Generate build image attestation
         uses: actions/attest-build-provenance@v4
