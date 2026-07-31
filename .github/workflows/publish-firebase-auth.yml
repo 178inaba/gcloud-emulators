@@ -31,6 +31,5 @@ jobs:
       version-command: |-
         echo "version=$(jq -r '.packages["node_modules/firebase-tools"].version' firebase-auth/package-lock.json)" >> $GITHUB_OUTPUT
       smoke-test-port: "9099"
-      cache-scope: publish-firebase-auth
     secrets:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

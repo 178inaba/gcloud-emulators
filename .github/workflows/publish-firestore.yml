@@ -28,7 +28,6 @@ jobs:
       version-command: |-
         echo "version=$(head -n 1 firestore/Dockerfile | cut -d ':' -f 2 | cut -d '-' -f 1)" >> $GITHUB_OUTPUT
       smoke-test-port: "8080"
-      cache-scope: publish-firestore
       database-mode: datastore-mode
     secrets:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

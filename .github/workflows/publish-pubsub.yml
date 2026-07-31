@@ -28,6 +28,5 @@ jobs:
       version-command: |-
         echo "version=$(head -n 1 pubsub/Dockerfile | cut -d ':' -f 2 | cut -d '-' -f 1)" >> $GITHUB_OUTPUT
       smoke-test-port: "8085"
-      cache-scope: publish-pubsub
     secrets:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

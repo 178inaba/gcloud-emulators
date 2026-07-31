@@ -21,10 +21,6 @@ on:
         description: TCP port the emulator listens on, used for both the service port mapping and the health check.
         required: true
         type: string
-      cache-scope:
-        description: Unique GitHub Actions cache scope for this image's build cache.
-        required: true
-        type: string
       database-mode:
         description: Value for the DATABASE_MODE env var passed to the smoke-test service container (Firestore only).
         required: false
@@ -94,8 +90,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
-          cache-from: type=gha,scope=${{ inputs.cache-scope }}
-          cache-to: type=gha,mode=max,scope=${{ inputs.cache-scope }}
+          cache-from: type=gha,scope=${{ inputs.image-name }}
+          cache-to: type=gha,mode=max,scope=${{ inputs.image-name }}
           provenance: false
       - name: Generate build image attestation
         uses: actions/attest-build-provenance@v4
