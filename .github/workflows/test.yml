@@ -36,8 +36,8 @@ jobs:
           context: ${{ matrix.emulator }}
           load: true
           tags: temp
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=test-${{ matrix.emulator }}
+          cache-to: type=gha,mode=max,scope=test-${{ matrix.emulator }}
       - name: Test
         timeout-minutes: 1
         run: |
