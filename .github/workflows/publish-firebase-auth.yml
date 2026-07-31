@@ -73,8 +73,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=publish-firebase-auth
+          cache-to: type=gha,mode=max,scope=publish-firebase-auth
           provenance: false
       - name: Generate build image attestation
         uses: actions/attest-build-provenance@v4
