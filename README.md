@@ -2,6 +2,7 @@
 
 [![Publish Firestore Emulator](https://github.com/178inaba/gcloud-emulators/actions/workflows/publish-firestore.yml/badge.svg)](https://github.com/178inaba/gcloud-emulators/actions/workflows/publish-firestore.yml)
 [![Publish Pub/Sub Emulator](https://github.com/178inaba/gcloud-emulators/actions/workflows/publish-pubsub.yml/badge.svg)](https://github.com/178inaba/gcloud-emulators/actions/workflows/publish-pubsub.yml)
+[![Publish Firebase Auth Emulator](https://github.com/178inaba/gcloud-emulators/actions/workflows/publish-firebase-auth.yml/badge.svg)](https://github.com/178inaba/gcloud-emulators/actions/workflows/publish-firebase-auth.yml)
 
 ## Firestore / Datastore Emulator
 
@@ -119,6 +120,68 @@ services:
       pubsub:
         condition: service_healthy
 ```
+
+## Firebase Auth Emulator
+
+Unlike the other images, this one is built from the [`firebase-tools`](https://www.npmjs.com/package/firebase-tools) npm package rather than the gcloud CLI, because the Firebase Auth emulator ships with `firebase-tools`.
+
+```console
+$ docker run -d --name firebase-auth-emulator -p 9099:9099 ghcr.io/178inaba/firebase-auth-emulator
+```
+
+The Emulator UI is disabled, which keeps the emulator usable without network access — with the UI enabled, `firebase-tools` downloads it at container start. To turn it on, mount your own `firebase.json` over `/app/firebase.json`.
+
+Offline, the CLI still logs `Unable to fetch the CLI MOTD and remote config` on startup. That warning is harmless and does not affect the emulator.
+
+### GitHub Actions
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      firebase-auth-emulator:
+        image: ghcr.io/178inaba/firebase-auth-emulator
+        ports:
+          - "9099:9099"
+    env:
+      FIREBASE_AUTH_EMULATOR_HOST: localhost:9099
+    steps:
+      - name: Test
+        run: |
+          # Replace this with running tests for your app.
+          curl -f localhost:9099
+```
+
+### Docker Compose
+
+```yaml
+services:
+  firebase-auth:
+    image: ghcr.io/178inaba/firebase-auth-emulator
+    ports:
+      - "9099:9099"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "localhost:9099"]
+
+  app:
+    build: .
+    environment:
+      FIREBASE_AUTH_EMULATOR_HOST: firebase-auth:9099
+    depends_on:
+      firebase-auth:
+        condition: service_healthy
+```
+
+### Environment Variables
+
+#### `FIREBASE_PROJECT`
+
+The project ID to start the Firebase Auth Emulator with.
+
+The default is `demo-project`. Firebase treats project IDs prefixed with `demo-` as offline-only, so the emulator never reaches real Firebase services.
+
+Clients may connect with any project ID regardless of this value, so you usually do not need to change it.
 
 ## License
 

@@ -1,0 +1,7 @@
+{
+  "name": "firebase-auth-emulator",
+  "private": true,
+  "dependencies": {
+    "firebase-tools": "15.25.0"
+  }
+}
