@@ -1,0 +1,120 @@
+name: Publish Emulator (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      image-name:
+        description: Image name under the repository owner's namespace, e.g. firestore-emulator.
+        required: true
+        type: string
+      build-context:
+        description: Docker build context directory.
+        required: true
+        type: string
+      version-command:
+        description: >-
+          Shell command that resolves the image's upstream version and appends
+          "version=<value>" to $GITHUB_OUTPUT.
+        required: true
+        type: string
+      smoke-test-port:
+        description: TCP port the emulator listens on, used for both the service port mapping and the health check.
+        required: true
+        type: string
+      cache-scope:
+        description: Unique GitHub Actions cache scope for this image's build cache.
+        required: true
+        type: string
+      database-mode:
+        description: Value for the DATABASE_MODE env var passed to the smoke-test service container (Firestore only).
+        required: false
+        type: string
+        default: ""
+    secrets:
+      DOCKERHUB_TOKEN:
+        required: true
+
+jobs:
+  build-publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository_owner }}/${{ inputs.image-name }}
+    outputs:
+      digest: ${{ steps.build-and-push.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log into Docker Hub
+        uses: docker/login-action@v4.5.2
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v4.5.2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get version
+        id: version
+        env:
+          VERSION_COMMAND: ${{ inputs.version-command }}
+        run: eval "$VERSION_COMMAND"
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: |
+            ${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=sha,prefix=
+          labels: |
+            org.opencontainers.image.authors=${{ github.repository_owner }}
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ inputs.build-context }}
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          cache-from: type=gha,scope=${{ inputs.cache-scope }}
+          cache-to: type=gha,mode=max,scope=${{ inputs.cache-scope }}
+          provenance: false
+      - name: Generate build image attestation
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
+
+  test-published-image:
+    name: Test Published Image
+    runs-on: ubuntu-latest
+    needs:
+      - build-publish
+    services:
+      emulator:
+        image: ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}@${{ needs.build-publish.outputs.digest }}
+        ports:
+          - "${{ inputs.smoke-test-port }}:${{ inputs.smoke-test-port }}"
+        env:
+          DATABASE_MODE: ${{ inputs.database-mode }}
+    steps:
+      - name: Test
+        run: curl -f localhost:${{ inputs.smoke-test-port }}
