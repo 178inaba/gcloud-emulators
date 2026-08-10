@@ -1,4 +1,4 @@
-FROM node:lts-slim@sha256:235600a8101ab264e117b1768e925532262668dc9b581ef1dd7d96ced463b8e7
+FROM node:lts-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl \
